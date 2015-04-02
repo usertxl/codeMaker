@@ -72,6 +72,12 @@ public class PropertiesTool {
 
 		return sql;
 	}
+	/**
+	 * 将CommentsMap.sql作为外挂注释</br>
+	 * 格式为tablename###colname###comments</br>
+	 * 将tablename和colname强制转换成了大写，方便后来调用</br>
+	 * @return
+	 */
 	private Map<String,Map<String,String>> getCommentsMap() {
 		Map<String,Map<String,String>> map=new HashMap<String, Map<String,String>>();
 		String jarPath = getClass().getProtectionDomain().getCodeSource()
@@ -86,11 +92,11 @@ public class PropertiesTool {
 			String temp = bufferedReader.readLine();
 			while (temp != null) {
 				String [] a=temp.split("###");
-				if(map.get(a[1])==null){
+				if(map.get(a[0].toUpperCase())==null){
 					Map<String,String> col=new HashMap<String, String>();
-					map.put(a[1], col);
+					map.put(a[0].toUpperCase(), col);
 				}
-				map.get(a[1]).put(a[2], a[0]);
+				map.get(a[0].toUpperCase()).put(a[1].toUpperCase(), a[2]);
 				temp = bufferedReader.readLine();
 			}
 		} catch (Exception e) {

@@ -196,11 +196,6 @@ public class Start extends JFrame {
 			ifDomain.setBounds(172, 68, 103, 23);
 			jContentPane.add(ifDomain);
 			
-//			ifDao = new JCheckBox("生成dao");
-//			ifDao.setSelected(true);
-//			ifDao.setBounds(293, 68, 103, 23);
-//			jContentPane.add(ifDao);
-			
 			ifMapper = new JCheckBox("生成Mapper");
 			ifMapper.setSelected(true);
 			ifMapper.setBounds(293, 68, 103, 23);
