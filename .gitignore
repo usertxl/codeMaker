@@ -1,0 +1,7 @@
+/bin/
+.fatjar
+sqlToDto_fat.jar
+run.bat
+mysql.sql
+oracle.sql
+deploy.properties
