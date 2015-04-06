@@ -1,11 +1,13 @@
 package org.gaofeng.sqltodto;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.gaofeng.common.CommonFunction;
 import org.gaofeng.common.MappingRule;
 import org.gaofeng.common.properties.PropertiesTool;
+import org.gaofeng.domain.GroupTableViewModel;
 import org.gaofeng.domain.TableViewModel;
 
 /**
@@ -14,268 +16,363 @@ import org.gaofeng.domain.TableViewModel;
  * @author gf
  *
  */
-public class MakeSqlMap {
+public class MakeSqlMap  extends CommonFunction{
 
-	public static void makeSqlMap(List<TableViewModel> listCol,
-			String tableName) throws IOException {
+	public static void makeSqlMap(GroupTableViewModel mapListCol, String tableName)
+			throws IOException {
 
+		List<TableViewModel> listKey=mapListCol.getListKey();
+		List<TableViewModel> listUnKey=mapListCol.getListUnKey();
+		List<TableViewModel> listAll=new ArrayList<TableViewModel>();
+		listAll.addAll(listKey);
+		listAll.addAll(listUnKey);
+		
 		StringBuffer sb = new StringBuffer();
-		makeHeader(sb);
-		sb.append("\n");
-		sb.append("\n");
-		makeResultMap(listCol, sb);
-		sb.append("\n");
-		makeColList(listCol, sb);
-		sb.append("\n");
-		makeWhereList(listCol, sb);
-		sb.append("\n");
-		makeSelectCount(listCol,sb);
-		sb.append("\n");
-		makeInsert(listCol, sb);
-		sb.append("\n");
-		makeUpdateHead(listCol, sb);
-		sb.append("\n");
-		makeQueryListData(listCol, sb);
-		sb.append("\n");
-		makeQuerySingleData(listCol, sb);
-		sb.append("\n");
-		makeEnd(sb);
+		sb.append(makeTittle());
+		sb.append(makeResultMap(listKey,listUnKey));
+		sb.append(makeDynWhereWhereClause());
+		sb.append(makeUpdateByDynWhereWhereClause());
+		sb.append(makeBaseColumnList(listAll));
+		sb.append(makeSelectByDynWhere("selectByDynWhere"));
+		sb.append(makeSelectByDynWhere("selectSingleByDynWhere"));
+		sb.append(makeSelectByPrimaryKey(listKey));
+		sb.append(makeDeleteByPrimaryKey(listKey));
+		sb.append(makeDeleteByDynWhere());
+		sb.append(makeInsert(listAll));
+		sb.append(makeInsertSelective(listAll));
+		sb.append(makeCountByDynWhere());
+		sb.append(makeUpdateByDynWhereSelective(listUnKey));
+		sb.append(makeUpdateByDynWhere(listAll));
+		sb.append(makeUpdateByPrimaryKeySelective(listKey,listUnKey));
+		sb.append(makeUpdateByPrimaryKey(listKey,listUnKey));
 
-	}
-
-	private static void makeQuerySingleData(List<TableViewModel> listCol,
-			StringBuffer sb) {
-		sb.append("    <select id=\"querySingleData\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
-				+ MappingRule.forClassName(CommonFunction.domainName) + PropertiesTool.BEANSUFFIXNAME +"\" resultMap=\""
-				+ MappingRule.forPropertyName(CommonFunction.domainName)
-				+ "Map"+"\">");
-		sb.append("\n");
-		sb.append("        select ");
-		sb.append("\n");
-		sb.append("        <include refid=\"column_List\"/>");
-		sb.append("\n");
-		
-		sb.append("        from "+CommonFunction.domainName+" ");
-		sb.append("\n");
-		sb.append("        <where>");
-		sb.append("\n");
-		sb.append("         <include refid=\"where_List\"/>");
-		sb.append("\n");
-		sb.append("        </where>");
-		sb.append("\n");
-		sb.append("    </select>");
-		
-	}
-	private static void makeQueryListData(List<TableViewModel> listCol,
-			StringBuffer sb) {
-		sb.append("    <select id=\"queryListData\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
-				+ MappingRule.forClassName(CommonFunction.domainName) + PropertiesTool.BEANSUFFIXNAME +"\" resultMap=\""
-				+ MappingRule.forPropertyName(CommonFunction.domainName)
-				+ "Map"+"\">");
-		sb.append("\n");
-		sb.append("        select ");
-		sb.append("\n");
-		sb.append("        <include refid=\"column_List\"/>");
-		sb.append("\n");
-		
-		sb.append("        from "+CommonFunction.domainName+" ");
-		sb.append("\n");
-		sb.append("        <where>");
-		sb.append("\n");
-		sb.append("         <include refid=\"where_List\"/>");
-		sb.append("\n");
-		sb.append("        </where>");
-		sb.append("\n");
-		sb.append("    </select>");
-		
-	}
-
-	private static void makeUpdateHead(List<TableViewModel> listCol,
-			StringBuffer sb) {
-		sb.append("    <update id=\"update_demo\">");
-		sb.append("\n");
-		sb.append("        UPDATE "+ CommonFunction.domainName);
-		sb.append("\n");
-		sb.append("        SET");
-		sb.append("\n");
-		  
-		for (int i=0;i<listCol.size();i++){
-			sb.append("        "+listCol.get(i).getField()+" = #{"+MappingRule.forPropertyName(listCol.get(i).getField())+",jdbcType="
-			+listCol.get(i).getMyBatisType() +"}");
-			if(i!=listCol.size()-1){
-				sb.append(",");
-				sb.append("\n");
-			}
-		}
-		sb.append("\n");
-		sb.append("        where  1=2 ");
-		sb.append("\n");
-		sb.append("    </update>");
-		sb.append("\n");
-	}
-
-	private static void makeSelectCount(List<TableViewModel> listCol,
-			StringBuffer sb) {
-		sb.append("    <select id=\"queryCount\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
-				+ MappingRule.forClassName(CommonFunction.domainName) + PropertiesTool.BEANSUFFIXNAME +"\" resultType=\"java.lang.Integer\">");
-		sb.append("\n");
-		sb.append("        select count(1) from "+CommonFunction.domainName+" ");
-		sb.append("\n");
-		sb.append("        <where>");
-		sb.append("\n");
-		sb.append("         <include refid=\"where_List\"/>");
-		sb.append("\n");
-		sb.append("        </where>");
-		sb.append("\n");
-		sb.append("    </select>");
-		
-	}
-
-	private static void makeWhereList(List<TableViewModel> listCol,
-			StringBuffer sb) {
-		sb.append("    <sql id=\"where_List\">");
-		sb.append("\n");
-		for ( int i = 0 ; i<listCol.size();i++){
-			sb.append("        <if test=\""+MappingRule.forPropertyName(listCol.get(i).getField())+" != null and "+
-					MappingRule.forPropertyName(listCol.get(i).getField()) +" !=''\">");
-			sb.append("\n");
-			sb.append("            <![CDATA[ and "+listCol.get(i).getField()+" = #{"+MappingRule.forPropertyName(listCol.get(i).getField())
-					+",jdbcType="+listCol.get(i).getMyBatisType()+"} ]]>");
-			sb.append("\n");
-			sb.append("        </if>");
-			sb.append("\n");
-		}
-		sb.append("        <if test=\"strSqlWhere!= null and strSqlWhere !=''\">");
-		sb.append("\n");
-		sb.append("            <![CDATA[ and #{strSqlWhere} ]]>\n");
-		sb.append("        </if>");
-		sb.append("\n");
-		sb.append("        <if test=\"strSqlOrderBy!= null and strSqlOrderBy !=''\">");
-		sb.append("\n");
-		sb.append("            <![CDATA[ #{strSqlOrderBy} ]]>\n");
-		sb.append("        </if>");
-		sb.append("\n");
-		sb.append("        <if test=\"limitStart != null and limitStart !='' and limitEnd != null and limitEnd !=''\">");
-		sb.append("\n");
-		sb.append("            <![CDATA[ limit #{limitStart,jdbcType=NUMBER},#{limitEnd,jdbcType=NUMBER} ]]>\n");
-		sb.append("        </if>");
-		sb.append("\n");
-		
-		
-		sb.append("    </sql>");
-		sb.append("\n");
-		
-	}
-
-	private static void makeColList(List<TableViewModel> listCol,
-			StringBuffer sb) {
-		sb.append("    <sql id=\"column_List\">");
-		sb.append("        ");
-		for ( int i=0;i<listCol.size();i++){
-			sb.append(listCol.get(i).getField());
-			if(i!=listCol.size()-1){
-				sb.append(",");
-			}
-			if(i%10==0 && i!=listCol.size()-1){
-				sb.append("\n        ");
-			}
-		}
-		sb.append("\n");
-		sb.append("    </sql>");
-	}
-
-	private static void makeEnd(StringBuffer sb) throws IOException {
-		sb.append("</mapper>");
-
-		System.out.println(sb.toString());
+		sysLog(sb.toString(), INFO);
 		MappingRule.makeFile(
 				MappingRule.sqlMapPath + "\\"
-						+ MappingRule.forClassName(CommonFunction.domainName)
+						+ tableNameForClassName
 						+ "Mapper.xml", sb.toString());
+
 	}
 
-	private static void makeInsert(List<TableViewModel> listCol,
-			StringBuffer sb) {
-		sb.append("	<insert id=\"insert"
-				+ "\" parameterType=\""
-				+ PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
-				+ MappingRule.forClassName(CommonFunction.domainName) + PropertiesTool.BEANSUFFIXNAME +"\"");
-		sb.append("\n");
-		sb.append("		statementType=\"PREPARED\" useGeneratedKeys=\"true\">");
-		sb.append("\n");
-		sb.append("		INSERT INTO " + CommonFunction.domainName + " (");
-		sb.append("\n");
-		sb.append("		<trim  suffixOverrides=\",\" >");
-		sb.append("\n");
-
-		for (int i = 0; i < listCol.size(); i++) {
-			String field = listCol.get(i).getField();
-			String fieldForPropertyName = MappingRule.forPropertyName(listCol
-					.get(i).getField());
-			sb.append("		<if  test=\"" + fieldForPropertyName + " != null and "
-					+ fieldForPropertyName + " !='' \"  >" + field +"</if>");
+	private static String makeUpdateByPrimaryKey(List<TableViewModel> listKey,List<TableViewModel> listUnKey) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("  <update id=\"updateByPrimaryKey\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
+				+ tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+"\" >\n");
+		sb.append("    update "+tableName+"\n");
+		sb.append("    set \n");
+		for(int i=0;i<listUnKey.size();i++){
+			sb.append("      "+listUnKey.get(i).getFieldName()+" = #{"+listUnKey.get(i).getPropertyName()+",jdbcType="+listUnKey.get(i).getMyBatisType()+"}");
+			if(i!=listUnKey.size()-1){
+				sb.append(",");
+			}
 			sb.append("\n");
 		}
-		sb.append("		</trim>");
-		sb.append("\n");
-		sb.append("		)");
-		sb.append("\n");
-		sb.append("		VALUES");
-		sb.append("\n");
-		sb.append("		(");
-		sb.append("\n");
-		sb.append("		<trim  suffixOverrides=\",\" >");
-		sb.append("\n");
-		for (int i = 0; i < listCol.size(); i++) {
-			
-			String fieldForPropertyName = MappingRule.forPropertyName(listCol
-					.get(i).getField());
-			sb.append("		<if test=\"" + fieldForPropertyName + " != null and "
-					+ fieldForPropertyName + " !='' \">#{"
-					+ fieldForPropertyName + ",jdbcType="
-					+ listCol.get(i).getMyBatisType()
-					+"}" +"</if>");
-			sb.append("\n");
+		for (int i = 0; i < listKey.size(); i++) {
+			if(i==0){
+				sb.append("    where "+listKey.get(i).getFieldName()+" = #{"+listKey.get(i).getPropertyName()+",jdbcType="+listKey.get(i).getMyBatisType()+"}\n");
+			}else{
+				sb.append("      and "+listKey.get(i).getFieldName()+" = #{"+listKey.get(i).getPropertyName()+",jdbcType="+listKey.get(i).getMyBatisType()+"}\n");
+			}
 		}
-		sb.append("		</trim>");
-		sb.append("\n");
-		sb.append("		)");
-		sb.append("\n");
-		sb.append("	</insert>");
+		sb.append("  </update>\n");
+		sb.append("</mapper>\n");
+		return sb.toString();
 	}
 
-	private static void makeResultMap(List<TableViewModel> listCol,
-			StringBuffer sb) {
-		sb.append("    <resultMap id=\""
-				+ MappingRule.forPropertyName(CommonFunction.domainName)
-				+ "Map\" type=\""
-				+ PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
-				+ MappingRule.forClassName(CommonFunction.domainName) + PropertiesTool.BEANSUFFIXNAME +"\">");
-		sb.append("\n");
-		for (int i = 0; i < listCol.size(); i++) {
-			String field = listCol.get(i).getField();
-			String fieldForPropertyName = MappingRule.forPropertyName(listCol
-					.get(i).getField());
-			sb.append("        <id property=\"" + fieldForPropertyName
-					+ "\" column=\"" + field + "\"/>");
-			sb.append("\n");
+	private static String makeUpdateByPrimaryKeySelective(List<TableViewModel> listKey,List<TableViewModel> listUnKey) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("  <update id=\"updateByPrimaryKeySelective\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
+				+ tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+"\" >\n");
+		sb.append("    update "+tableName+"\n");
+		sb.append("    <set >\n");
+		for(TableViewModel tb:listUnKey){
+			sb.append("      <if test=\""+tb.getPropertyName()+" != null\" >\n");
+			sb.append("        "+tb.getFieldName()+" = #{"+tb.getPropertyName()+",jdbcType="+tb.getMyBatisType()+"},\n");
+			sb.append("      </if>\n");
 		}
-		sb.append("    </resultMap>");
+		sb.append("    </set>\n");
+		for(int i=0;i<listKey.size();i++){
+			if(i==0){
+				sb.append("    where "+listKey.get(i).getFieldName()+" = #{"+listKey.get(i).getPropertyName()+",jdbcType="+listKey.get(i).getMyBatisType()+"}\n");
+			}else{
+				sb.append("      and "+listKey.get(i).getFieldName()+" = #{"+listKey.get(i).getPropertyName()+",jdbcType="+listKey.get(i).getMyBatisType()+"}\n");
+			}
+		}
+		
+		sb.append("  </update>\n");
+		return sb.toString();
 	}
 
-	private static void makeHeader(StringBuffer sb) {
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
-		sb.append("\n");
-		sb.append("<!DOCTYPE mapper");
-		sb.append("\n");
-		sb.append("  PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\"");
-		sb.append("\n");
-		sb.append("  \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">");
-		sb.append("\n");
+	private static String makeUpdateByDynWhere(List<TableViewModel> listAll) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("  <update id=\"updateByDynWhere\" parameterType=\"map\" >\n");
+		sb.append("    update "+tableName+"\n");
+		sb.append("    set \n");
+		for(int i=0;i<listAll.size();i++){
+			sb.append("      "+listAll.get(i).getFieldName()+" = #{record."+listAll.get(i).getPropertyName()+",jdbcType="+listAll.get(i).getMyBatisType()+"}");
+			if (i != listAll.size() - 1) {
+				sb.append(",");
+			}
+			sb.append("\n");
+		}
+		sb.append("    <if test=\"_parameter != null\" >\n");
+		sb.append("      <include refid=\"Update_By_DynWhere_Where_Clause\" />\n");
+		sb.append("    </if>\n");
+		sb.append("  </update>\n");
+		return sb.toString();
+	}
+
+	private static String makeUpdateByDynWhereSelective(List<TableViewModel> listUnKey) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("  <update id=\"updateByDynWhereSelective\" parameterType=\"map\" >\n");
+		sb.append("    update "+tableName+"\n");
+		sb.append("    <set >\n");
+		for(TableViewModel tb:listUnKey){
+			sb.append("      <if test=\"record."+tb.getPropertyName()+" != null\" >\n");
+			sb.append("        id = #{record."+tb.getPropertyName()+",jdbcType="+tb.getMyBatisType()+"},\n");
+			sb.append("      </if>\n");
+		}
+		sb.append("    </set>\n");
+		sb.append("    <if test=\"_parameter != null\" >\n");
+		sb.append("      <include refid=\"Update_By_DynWhere_Where_Clause\" />\n");
+		sb.append("    </if>\n");
+		sb.append("  </update>\n");
+		return sb.toString();
+	}
+
+	private static String makeCountByDynWhere() {
+		StringBuffer sb=new StringBuffer();
+		sb.append("  <select id=\"countByDynWhere\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
+				+ tableNameForClassName+"DynWhere"+PropertiesTool.BEANSUFFIXNAME+"\" resultType=\"java.lang.Integer\" >\n");
+		sb.append("    select count(*) from "+tableName+"\n");
+		sb.append("    <if test=\"_parameter != null\" >\n");
+		sb.append("      <include refid=\"DynWhere_Where_Clause\" />\n");
+		sb.append("    </if>\n");
+		sb.append("  </select>\n");
+		return sb.toString();
+	}
+
+	private static String makeInsertSelective(List<TableViewModel> listAll) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("  <insert id=\"insertSelective\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
+				+ tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+"\" >\n");
+		sb.append("    insert into "+tableName+"\n");
+		sb.append("    <trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\" >\n");
+		for(TableViewModel tb:listAll){
+			sb.append("      <if test=\""+tb.getPropertyName()+" != null\" >\n");
+			sb.append("        "+tb.getFieldName()+",\n");
+			sb.append("      </if>\n");
+		}
+		sb.append("    </trim>\n");
+		sb.append("    <trim prefix=\"values (\" suffix=\")\" suffixOverrides=\",\" >\n");
+		for(TableViewModel tb:listAll){
+			sb.append("      <if test=\""+tb.getPropertyName()+" != null\" >\n");
+			sb.append("        #{"+tb.getPropertyName()+",jdbcType="+tb.getMyBatisType()+"},\n");
+			sb.append("      </if>\n");
+		}
+		sb.append("    </trim>\n");
+		sb.append("  </insert>\n");
+		return sb.toString();
+	}
+
+	private static String makeInsert(List<TableViewModel> listAll) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("  <insert id=\"insert\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
+				+ tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+"\" >\n");
+		sb.append("    insert into "+tableName+" ( <include refid=\"Base_Column_List\" /> )\n");
+		sb.append("    values (");
+		for(int i=0;i<listAll.size();i++){
+			sb.append("#{"+listAll.get(i).getPropertyName()+",jdbcType="+listAll.get(i).getMyBatisType()+"}");
+			if(i!=listAll.size()-1){
+				sb.append(",");
+			}
+			if((i+1)%4==0){
+				sb.append("\n      ");
+			}
+		}
+		sb.append(")\n");
+		sb.append("  </insert>\n");
+		return sb.toString();
+	}
+
+	private static String makeDeleteByDynWhere() {
+		StringBuffer sb=new StringBuffer();
+		sb.append("  <delete id=\"deleteByDynWhere\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
+				+ tableNameForClassName+"DynWhere"+PropertiesTool.BEANSUFFIXNAME+"\" >\n");
+		sb.append("    delete from "+tableName+"\n");
+		sb.append("    <if test=\"_parameter != null\" >\n");
+		sb.append("      <include refid=\"DynWhere_Where_Clause\" />\n");
+		sb.append("    </if>\n");
+		sb.append("  </delete>\n");
+		return sb.toString();
+	}
+
+	private static String makeDeleteByPrimaryKey(List<TableViewModel> listKey) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("  <delete id=\"deleteByPrimaryKey\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
+				+ tableNameForClassName+"Key"+PropertiesTool.BEANSUFFIXNAME+"\" >\n");
+		sb.append("    delete from "+tableName+"\n");
+		for(int i=0;i<listKey.size();i++){
+			if(i==0){
+				sb.append("    where "+listKey.get(i).getFieldName()+" = #{"+listKey.get(i).getPropertyName()+",jdbcType="+listKey.get(i).getMyBatisType()+"}\n");
+			}else{
+				sb.append("      and "+listKey.get(i).getFieldName()+" = #{"+listKey.get(i).getPropertyName()+",jdbcType="+listKey.get(i).getMyBatisType()+"}\n");
+			}
+		}
+		sb.append("  </delete>\n");
+		return sb.toString();
+	}
+
+	private static String makeSelectByPrimaryKey(List<TableViewModel> listKey) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("  <select id=\"selectByPrimaryKey\" resultMap=\"BaseResultMap\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
+				+ tableNameForClassName+"Key"+PropertiesTool.BEANSUFFIXNAME+"\" >\n");
+		sb.append("    select \n");
+		sb.append("    <include refid=\"Base_Column_List\" />\n");
+		sb.append("    from "+tableName+"\n");
+		for(int i=0;i<listKey.size();i++){
+			if(i==0){
+				sb.append("    where "+listKey.get(i).getFieldName()+" = #{"+listKey.get(i).getPropertyName()+",jdbcType="+listKey.get(i).getMyBatisType()+"}\n");
+			}else{
+				sb.append("      and "+listKey.get(i).getFieldName()+" = #{"+listKey.get(i).getPropertyName()+",jdbcType="+listKey.get(i).getMyBatisType()+"}\n");
+			}
+		}
+		sb.append("  </select>\n");
+		return sb.toString();
+	}
+
+	private static String makeSelectByDynWhere(String stringSqlName) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("  <select id=\""+stringSqlName+"\" resultMap=\"BaseResultMap\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
+				+ tableNameForClassName+"DynWhere"+PropertiesTool.BEANSUFFIXNAME+"\" >\n");
+		sb.append("    select\n");
+		sb.append("    <if test=\"distinct\" >\n");
+		sb.append("      distinct\n");
+		sb.append("    </if>\n");
+		sb.append("    <include refid=\"Base_Column_List\" />\n");
+		sb.append("    from "+tableName+" \n");
+		sb.append("    <if test=\"_parameter != null\" >\n");
+		sb.append("      <include refid=\"DynWhere_Where_Clause\" />\n");
+		sb.append("    </if>\n");
+		sb.append("    <if test=\"strSqlOrderBy != null\" >\n");
+		sb.append("      order by ${strSqlOrderBy}\n");
+		sb.append("    </if>\n");
+		sb.append("    <if test=\"limitStart != null and limitEnd != null\" >\n");
+		sb.append("       LIMIT ${limitStart},${limitEnd} \n");
+		sb.append("    </if>\n");
+		sb.append("  </select>\n");
+		return sb.toString();
+	}
+
+	private static String makeBaseColumnList(List<TableViewModel> listAll) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("  <sql id=\"Base_Column_List\" >\n");
+		sb.append("    ");
+		for(int i=0;i<listAll.size();i++){
+			sb.append(listAll.get(i).getFieldName());
+			if(i!=listAll.size()-1){
+				sb.append(",");
+			}
+			if((i+1)%10==0){
+				sb.append("\n    ");
+			}
+		}
+		sb.append("  </sql>\n");
+		return sb.toString();
+	}
+
+	private static String makeUpdateByDynWhereWhereClause() {
+		StringBuffer sb=new StringBuffer();
+		sb.append("  <sql id=\"Update_By_DynWhere_Where_Clause\" >\n");
+		sb.append("    <where >\n");
+		sb.append("      <foreach collection=\"dynWhere.oredCriteria\" item=\"criteria\" separator=\"or\" >\n");
+		sb.append("        <if test=\"criteria.valid\" >\n");
+		sb.append("          <trim prefix=\"(\" suffix=\")\" prefixOverrides=\"and\" >\n");
+		sb.append("            <foreach collection=\"criteria.criteria\" item=\"criterion\" >\n");
+		sb.append("              <choose >\n");
+		sb.append("                <when test=\"criterion.noValue\" >\n");
+		sb.append("                  and ${criterion.condition}\n");
+		sb.append("                </when>\n");
+		sb.append("                <when test=\"criterion.singleValue\" >\n");
+		sb.append("                  and ${criterion.condition} #{criterion.value}\n");
+		sb.append("                </when>\n");
+		sb.append("                <when test=\"criterion.betweenValue\" >\n");
+		sb.append("                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}\n");
+		sb.append("                </when>\n");
+		sb.append("                <when test=\"criterion.listValue\" >\n");
+		sb.append("                  and ${criterion.condition}\n");
+		sb.append("                  <foreach collection=\"criterion.value\" item=\"listItem\" open=\"(\" close=\")\" separator=\",\" >\n");
+		sb.append("                    #{listItem}\n");
+		sb.append("                  </foreach>\n");
+		sb.append("                </when>\n");
+		sb.append("              </choose>\n");
+		sb.append("            </foreach>\n");
+		sb.append("          </trim>\n");
+		sb.append("        </if>\n");
+		sb.append("      </foreach>\n");
+		sb.append("    </where>\n");
+		sb.append("  </sql>\n");
+		return sb.toString();
+	}
+
+	private static String makeDynWhereWhereClause() {
+		StringBuffer sb =new StringBuffer();
+		sb.append("  <sql id=\"DynWhere_Where_Clause\" >\n");
+		sb.append("    <where >\n");
+		sb.append("      <foreach collection=\"oredCriteria\" item=\"criteria\" separator=\"or\" >\n");
+		sb.append("        <if test=\"criteria.valid\" >\n");
+		sb.append("          <trim prefix=\"(\" suffix=\")\" prefixOverrides=\"and\" >\n");
+		sb.append("            <foreach collection=\"criteria.criteria\" item=\"criterion\" >\n");
+		sb.append("              <choose >\n");
+		sb.append("                <when test=\"criterion.noValue\" >\n");
+		sb.append("                  and ${criterion.condition}\n");
+		sb.append("                </when>\n");
+		sb.append("                <when test=\"criterion.singleValue\" >\n");
+		sb.append("                  and ${criterion.condition} #{criterion.value}\n");
+		sb.append("                </when>\n");
+		sb.append("                <when test=\"criterion.betweenValue\" >\n");
+		sb.append("                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}\n");
+		sb.append("                </when>\n");
+		sb.append("                <when test=\"criterion.listValue\" >\n");
+		sb.append("                  and ${criterion.condition}\n");
+		sb.append("                  <foreach collection=\"criterion.value\" item=\"listItem\" open=\"(\" close=\")\" separator=\",\" >\n");
+		sb.append("                    #{listItem}\n");
+		sb.append("                  </foreach>\n");
+		sb.append("                </when>\n");
+		sb.append("              </choose>\n");
+		sb.append("            </foreach>\n");
+		sb.append("          </trim>\n");
+		sb.append("        </if>\n");
+		sb.append("      </foreach>\n");
+		sb.append("    </where>\n");
+		sb.append("  </sql>\n");
+		return sb.toString();
+	}
+
+	private static String makeResultMap(List<TableViewModel> listKey, List<TableViewModel> listUnKey) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("  <resultMap id=\"BaseResultMap\" type=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
+				+ tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+"\" >\n");
+		
+		for(TableViewModel pri:listKey){
+			sb.append("    <id column=\""+pri.getFieldName()+"\" property=\""+pri.getPropertyName()+"\" jdbcType=\""+pri.getMyBatisType()+"\" />\n");
+		}
+		for(TableViewModel unPri:listUnKey){
+			sb.append("    <result column=\""+unPri.getFieldName()+"\" property=\""+unPri.getPropertyName()+"\" jdbcType=\""+unPri.getMyBatisType()+"\" />\n");
+		}
+		sb.append("  </resultMap>\n");
+		return sb.toString();
+	}
+
+	private static String makeTittle() {
+		StringBuffer sb=new StringBuffer();
+		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
+		sb.append("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\" >\n");
 		sb.append("<mapper namespace=\""
 				+ PropertiesTool.MAPPERPACKAGENAME.replace(";", "") + "."
-				+ MappingRule.forClassName(CommonFunction.domainName)
-				+ "Mapper\">");
-
+				+ tableNameForClassName
+				+ "Mapper\">\n");
+		return sb.toString();
 	}
+
 }

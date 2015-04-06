@@ -9,7 +9,7 @@ import org.gaofeng.common.properties.PropertiesTool;
 import org.gaofeng.mysql.utils.MysqlUtils;
 import org.gaofeng.oracle.utils.OracleUtils;
 
-public class MappingRule {
+public class MappingRule extends CommonFunction{
 	static public Boolean ifDomain=PropertiesTool.IFDOMAIN;
 	static public Boolean ifMapper=PropertiesTool.IFMAPPER;
 	static public Boolean ifSql=PropertiesTool.IFSQL;
@@ -135,8 +135,7 @@ public class MappingRule {
 	 */
 	public static void makeFile(String path, String context) throws IOException {
 		File file = new File(path);
-		System.out.println(path);
-		
+		sysLog(path, INFO);
 		File parent = file.getParentFile(); 
 		if(parent!=null&&!parent.exists()){ 
 		parent.mkdirs(); 

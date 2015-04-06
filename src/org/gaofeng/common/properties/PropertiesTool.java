@@ -1,12 +1,14 @@
 package org.gaofeng.common.properties;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import org.gaofeng.common.file.FileUtils;
 
 /**
  * 获得deploy.properties里面值
@@ -30,74 +32,85 @@ public class PropertiesTool {
 	public static String DAOPACKAGENAME = getStringProperty("daoPackageName");
 	public static String MAPPERPACKAGENAME = getStringProperty("mapperPackageName");
 	public static String MAPPERPATH = getStringProperty("mapperPath");
-
-	public static String DOMAINEXTENDS = getStringProperty("domainExtends");
-	public static String DAOEXTENDS = getStringProperty("daoExtends");
-	public static String MAPPEREXTENDS = getStringProperty("mapperExtends");
 	public static String BEANSUFFIXNAME = getStringProperty("beanSuffixName");
 
 	public static Boolean IFDOMAIN = getBooleanProperty("ifDomain");
-	public static Boolean IFDAO = getBooleanProperty("ifDao");
 	public static Boolean IFMAPPER = getBooleanProperty("ifMapper");
 	public static Boolean IFSQL = getBooleanProperty("ifSql");
+	public static Map<String,Boolean> LOGLEV =getStringsProperty("logLev");
 
-	public static String SQL=PropertiesTool.getInstance().getSql();
-	public static Map<String,Map<String,String>> commentsMap=PropertiesTool.getInstance().getCommentsMap();
-	private static Map<String,Properties> properties;
+	public static String SQLBATCH = PropertiesTool.getInstance().getSql("batch.sql");
+	public static String SQLSINGLE = PropertiesTool.getInstance().getSql("single.sql");
+	public static List<String> SQLLIST = PropertiesTool.getInstance()
+			.getSqlList();
+	public static Map<String, Map<String, String>> commentsMap = PropertiesTool
+			.getInstance().getCommentsMap();
+	private static Map<String, Properties> properties;
 
-
-	private String getSql() {
+	private String getSql(String fileName) {
 		String sql = "";
-		String jarPath = getClass().getProtectionDomain().getCodeSource()
-				.getLocation().getPath();
-		jarPath = jarPath.substring(jarPath.indexOf("/") + 1,
-				jarPath.lastIndexOf("/"));
-		File file = new File(jarPath +"/"+ PropertiesTool.TYPE + ".sql");
-		try {
-			InputStreamReader read = new InputStreamReader(new FileInputStream(
-					file), "GBK");
-			BufferedReader bufferedReader = new BufferedReader(read);
-			String temp = bufferedReader.readLine();
-			sql += " "+ temp +" ";
-			while (temp != null) {
-				temp = bufferedReader.readLine();
-				if(temp!=null){
-					sql += " "+ temp +" ";
-				}
+		List<String> listStr = FileUtils.getInstance().getSqlStrsByFileName(
+				fileName);
+		for (String a : listStr) {
+			if (a != null) {
+				sql += " " + a + " ";
 			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-
 		return sql;
 	}
-	/**
-	 * 将CommentsMap.sql作为外挂注释</br>
-	 * 格式为tablename###colname###comments</br>
-	 * 将tablename和colname强制转换成了大写，方便后来调用</br>
-	 * @return
-	 */
-	private Map<String,Map<String,String>> getCommentsMap() {
-		Map<String,Map<String,String>> map=new HashMap<String, Map<String,String>>();
-		String jarPath = getClass().getProtectionDomain().getCodeSource()
-				.getLocation().getPath();
-		jarPath = jarPath.substring(jarPath.indexOf("/") + 1,
-				jarPath.lastIndexOf("/"));
-		File file = new File(jarPath +"/"+  "CommentsMap.sql");
-		try {
-			InputStreamReader read = new InputStreamReader(new FileInputStream(
-					file), "UTF-8");
-			BufferedReader bufferedReader = new BufferedReader(read);
-			String temp = bufferedReader.readLine();
-			while (temp != null) {
-				String [] a=temp.split("###");
-				if(map.get(a[0].toUpperCase())==null){
-					Map<String,String> col=new HashMap<String, String>();
-					map.put(a[0].toUpperCase(), col);
+
+	private static Map<String, Boolean> getStringsProperty(String key) {
+		PropertiesTool tool = PropertiesTool.getInstance();
+		Map<String,Boolean> map=new HashMap<String, Boolean>();
+		String value = tool.readValue("/deploy.properties", key);
+		if (value == null) {
+			value = "";
+		}
+		String [] strs=value.split(",");
+		for(String a:strs){
+			map.put(a, true);
+		}
+		return map;
+	}
+
+	private List<String> getSqlList() {
+		List<String> listSql = new ArrayList<String>();
+		String sql = "";
+		List<String> listStr = FileUtils.getInstance().getSqlStrsByFileName(
+				"single.sql");
+
+		for (String a : listStr) {
+			if (a != null) {
+				if (a.indexOf(";") > -1) {
+					sql += " " + a.substring(0, a.indexOf(";")) + " ";
+					listSql.add(sql);
+					sql = "";
+				} else {
+					sql += " " + a + " ";
 				}
-				map.get(a[0].toUpperCase()).put(a[1].toUpperCase(), a[2]);
-				temp = bufferedReader.readLine();
+			}
+		}
+		if (!"".equals(sql)) {
+			listSql.add(sql);
+		}
+		return listSql;
+	}
+
+	private Map<String, Map<String, String>> getCommentsMap() {
+		Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
+		List<String> listStr = FileUtils.getInstance().getSqlStrsByFileName(
+				"CommentsMap.sql");
+		try {
+			for (String temp : listStr) {
+				if (temp.indexOf("###") > -1) {
+					String[] a = temp.split("###");
+					if (map.get(a[0]) == null) {
+						Map<String, String> col = new HashMap<String, String>();
+						map.put(a[0], col);
+					}
+					map.get(a[0]).put(a[1], a[2]);
+				}
+
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -167,15 +180,13 @@ public class PropertiesTool {
 	 */
 	public String readValue(String filePath, String key) {
 		try {
-			if(properties==null){
-				properties=new HashMap<String, Properties>();
+			if (properties == null) {
+				properties = new HashMap<String, Properties>();
 			}
 			if (properties.get(filePath) == null) {
 				Properties props = new Properties();
-				String jarPath= getClass().getProtectionDomain().getCodeSource().getLocation().getPath() ;
-				jarPath=jarPath.substring(jarPath.indexOf("/")+1,jarPath.lastIndexOf("/"));
-				File file = new File(jarPath+filePath);  
-		        FileInputStream in = new FileInputStream(file); 
+				File file = FileUtils.getInstance().getFile(filePath);
+				FileInputStream in = new FileInputStream(file);
 				props.load(in);
 				properties.put(filePath, props);
 			}

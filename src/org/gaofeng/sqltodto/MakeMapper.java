@@ -14,7 +14,7 @@ import org.gaofeng.domain.TableViewModel;
  * @author gf
  *
  */
-public class MakeMapper {
+public class MakeMapper  extends CommonFunction{
 
 	public static void makeMapper(List<TableViewModel> listCol,
 			String tableName) throws IOException {
@@ -28,44 +28,37 @@ public class MakeMapper {
 			sb.append("\n");
 			sb.append("\n");
 		}
+		sb.append("	import "+PropertiesTool.DOMAINPACKAGENAME.replaceAll(";", "")+"."+tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+";	\n");
+		sb.append("	import "+PropertiesTool.DOMAINPACKAGENAME.replaceAll(";", "")+"."+tableNameForClassName+"DynWhere"+PropertiesTool.BEANSUFFIXNAME+";	\n");
+		sb.append("	import "+PropertiesTool.DOMAINPACKAGENAME.replaceAll(";", "")+"."+tableNameForClassName+"Key"+PropertiesTool.BEANSUFFIXNAME+";	\n");
+		sb.append("		\n");
+		sb.append("	import java.util.List;	\n");
+		sb.append("		\n");
+		sb.append("	import org.apache.ibatis.annotations.Param;	\n");
+		sb.append("		\n");
+		sb.append("	public interface "+tableNameForClassName+"Mapper {	\n");
+		sb.append("	    int countByDynWhere("+tableNameForClassName+"DynWhere"+PropertiesTool.BEANSUFFIXNAME+" dynWhere);	\n");
+		sb.append("	    int deleteByDynWhere("+tableNameForClassName+"DynWhere"+PropertiesTool.BEANSUFFIXNAME+" dynWhere);	\n");
+		sb.append("	    int deleteByPrimaryKey("+tableNameForClassName+"Key"+PropertiesTool.BEANSUFFIXNAME+" key);	\n");
+		sb.append("	    int insert("+tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+" record);	\n");
+		sb.append("	    int insertSelective("+tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+" record);	\n");
+		sb.append("	    List<"+tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+"> selectByDynWhere("+tableNameForClassName+"DynWhere"+PropertiesTool.BEANSUFFIXNAME+" dynWhere);	\n");
+		sb.append("	    "+tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+" selectSingleByDynWhere("+tableNameForClassName+"DynWhere"+PropertiesTool.BEANSUFFIXNAME+" dynWhere);	\n");
 
-		sb.append("import java.util.List;");
-		sb.append("\n");
-		sb.append("\n");
-		sb.append("import "
-				+ PropertiesTool.DOMAINPACKAGENAME.replaceAll(";", "") + "."
-				+ MappingRule.forClassName(CommonFunction.domainName)
-				+ PropertiesTool.BEANSUFFIXNAME+";");
-		sb.append("\n");
-		sb.append("\n");
-		sb.append("public interface "
-				+ MappingRule.forClassName(CommonFunction.domainName)
-				+ "Mapper {");
-		sb.append("\n");
-		sb.append("\n");
-		sb.append("    public int insert ("
-				+ MappingRule.forClassName(CommonFunction.domainName)
-				+ PropertiesTool.BEANSUFFIXNAME+" "+PropertiesTool.BEANSUFFIXNAME+");");
-		sb.append("\n");
-		sb.append("    public int queryCount("+  MappingRule.forClassName(CommonFunction.domainName)
-				+PropertiesTool.BEANSUFFIXNAME+" "+PropertiesTool.BEANSUFFIXNAME+");");
-		sb.append("\n");
-		sb.append("    public List<"+MappingRule.forClassName(CommonFunction.domainName)
-				+ PropertiesTool.BEANSUFFIXNAME+"> queryListData("+  MappingRule.forClassName(CommonFunction.domainName)
-				+PropertiesTool.BEANSUFFIXNAME+" "+PropertiesTool.BEANSUFFIXNAME+");");
-		sb.append("\n");
-		sb.append("    public "+MappingRule.forClassName(CommonFunction.domainName)
-				+ PropertiesTool.BEANSUFFIXNAME+" querySingleData("+  MappingRule.forClassName(CommonFunction.domainName)
-				+PropertiesTool.BEANSUFFIXNAME+" "+PropertiesTool.BEANSUFFIXNAME+");");
-		sb.append("\n");
-		sb.append("\n");
-		sb.append("}");
-		sb.append("\n");
+		sb.append("	    "+tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+" selectByPrimaryKey("+tableNameForClassName+"Key"+PropertiesTool.BEANSUFFIXNAME+" key);	\n");
+		sb.append("	    int updateByDynWhereSelective(@Param(\"record\") "+tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+" record, @Param(\"dynWhere\") "+tableNameForClassName+"DynWhere"+PropertiesTool.BEANSUFFIXNAME+" dynWhere);	\n");
+		sb.append("	    int updateByDynWhere(@Param(\"record\") "+tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+" record, @Param(\"dynWhere\") "+tableNameForClassName+"DynWhere"+PropertiesTool.BEANSUFFIXNAME+" dynWhere);	\n");
+		sb.append("	    int updateByPrimaryKeySelective("+tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+" record);	\n");
+		sb.append("	    int updateByPrimaryKey("+tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+" record);	\n");
+		sb.append("	}	\n");
 
-		System.out.println(sb.toString());
+		
+		
+		
+		sysLog(sb.toString(), INFO);
 		MappingRule.makeFile(
 				MappingRule.mapperPath + "\\"
-						+ MappingRule.forClassName(CommonFunction.domainName)
+						+ tableNameForClassName
 						+ "Mapper.java", sb.toString());
 
 	}

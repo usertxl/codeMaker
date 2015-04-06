@@ -2,106 +2,139 @@ package org.gaofeng.domain;
 
 public class TableViewModel {
 
-	private String field;
+	private String fieldName;
 	private String type;
 	private String scale;
-	private String common;
+	private String comment;
 	private String javaType;
 	private String myBatisType;
+	private String propertyName;
+	private String className;
+	private Boolean isPrimaryKey;
 
 	/**
-	 * 字段名
-	 * @return
+	 * @return 字段名
 	 */
-	public String getField() {
-		return field;
+	public String getFieldName() {
+		return fieldName;
 	}
 
 	/**
-	 * 字段名
-	 * @param field
+	 * @param 字段名
 	 */
-	public void setField(String field) {
-		this.field = field;
+	public void setFieldName(String fieldName) {
+		this.fieldName = fieldName;
 	}
 
 	/**
-	 * 字段类型
-	 * @return
+	 * @return 字段类型
 	 */
 	public String getType() {
 		return type;
 	}
 
 	/**
-	 * 字段类型
-	 * @param type
+	 * @param 字段类型
 	 */
 	public void setType(String type) {
 		this.type = type;
 	}
 
 	/**
-	 * 小数点位数
-	 * @return
+	 * @return 小数点位数
 	 */
 	public String getScale() {
 		return scale;
 	}
 
 	/**
-	 * 小数点位数
-	 * @param scale
+	 * @param 小数点位数
 	 */
 	public void setScale(String scale) {
 		this.scale = scale;
 	}
 
 	/**
-	 * 备注
-	 * @return
+	 * @return 数据库字段备注
 	 */
-	public String getCommon() {
-		return common;
+	public String getComment() {
+		return comment;
 	}
 
 	/**
-	 * 备注
-	 * @param common
+	 * @param 数据库字段备注
 	 */
-	public void setCommon(String common) {
-		this.common = common;
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
 	/**
-	 * 对应java的类型
-	 * @return the javaType
+	 * @return 对应java的类型
 	 */
 	public String getJavaType() {
 		return javaType;
 	}
 
 	/**
-	 * 对应java的类型
-	 * @param javaType the javaType to set
+	 * @param 对应java的类型
 	 */
 	public void setJavaType(String javaType) {
 		this.javaType = javaType;
 	}
 
 	/**
-	 * 对应mybatis的类型
-	 * @return the myBatisType
+	 * @return 对应mybatis的类型
 	 */
 	public String getMyBatisType() {
 		return myBatisType;
 	}
 
 	/**
-	 * 对应mybatis的类型
-	 * @param myBatisType the myBatisType to set
+	 * @param 对应mybatis的类型
 	 */
 	public void setMyBatisType(String myBatisType) {
 		this.myBatisType = myBatisType;
+	}
+
+	/**
+	 * @return 驼峰式首字母小写
+	 */
+	public String getPropertyName() {
+		return propertyName;
+	}
+
+	/**
+	 * @param 驼峰式首字母小写
+	 */
+	public void setPropertyName(String propertyName) {
+		this.propertyName = propertyName;
+	}
+
+	/**
+	 * @return 驼峰式首字母大写
+	 */
+	public String getClassName() {
+		return className;
+	}
+
+	/**
+	 * @param  驼峰式首字母大写
+	 */
+	public void setClassName(String className) {
+		this.className = className;
+	}
+
+	/**
+	 * @return 是否是主键
+	 */
+	public Boolean getIsPrimaryKey() {
+		return isPrimaryKey;
+	}
+
+	/**
+	 * @param 是否是主键
+	 */
+	public void setIsPrimaryKey(Boolean isPrimaryKey) {
+		this.isPrimaryKey = isPrimaryKey;
 	}
 }
