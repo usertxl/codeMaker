@@ -19,6 +19,6 @@
 <p style="font-size: 14px;"> 为了方便配置，我使用一个类进行数据库类型-java类型-jdbc类型的关系进行了一个映射org.gaofeng.mysql.utils.MysqlUtils</p>
 <p style="font-size: 14px;"> 一般不用修改，我这个是按照mybatis generator的规则写的，如果他的是正确的，我这个也差不多</p>
 
-<p>https://github.com/usertxl/codeMaker/wiki/%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E</p>
-<p>https://github.com/usertxl/codeMaker/wiki/%E8%BF%99%E4%B8%AA%E4%B8%9C%E8%A5%BF%E8%83%BD%E5%B9%B2%E4%BB%80%E4%B9%88</p>
+<p>使用说明：https://github.com/usertxl/codeMaker/wiki/%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E</p>
+<p>程序介绍：https://github.com/usertxl/codeMaker/wiki/%E8%BF%99%E4%B8%AA%E4%B8%9C%E8%A5%BF%E8%83%BD%E5%B9%B2%E4%BB%80%E4%B9%88</p>
 ####已经支持mysql数据库，因本人不用oracle所以这是预留了接口，没有调试
