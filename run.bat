@@ -2,15 +2,15 @@
 chcp 936
 :begin
 echo.
-echo 1. ÅúÁ¿Éú³É
+echo 1. æ‰¹é‡ç”Ÿæˆ
 echo.
-echo 2. µ¥ÌõÉú³É
+echo 2. å•æ¡ç”Ÿæˆ
 
-set /p c=ÇëÊäÈë£¨1¡¢2£©
+set /p c=è¯·è¾“å…¥ï¼ˆ1ã€2ï¼‰
 if "%c%"=="1" (
-java -cp sqlToDto_fat.jar  org.gaofeng.main.RunBatch
+java -cp codeMaker_fat.jar  org.gaofeng.main.RunBatch
 )
 if "%c%"=="2" (
-java -cp sqlToDto_fat.jar  org.gaofeng.main.RunSingle
+java -cp codeMaker_fat.jar  org.gaofeng.main.RunSingle
 )
 goto begin
