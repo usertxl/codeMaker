@@ -31,10 +31,11 @@ public class MakeSqlMap  extends CommonFunction{
 		sb.append(makeTittle());
 		sb.append(makeResultMap(listKey,listUnKey));
 		sb.append(makeDynWhereWhereClause());
+		sb.append(makeWhereList(listAll));
 		sb.append(makeUpdateByDynWhereWhereClause());
 		sb.append(makeBaseColumnList(listAll));
-		sb.append(makeSelectByDynWhere("selectByDynWhere"));
-		sb.append(makeSelectByDynWhere("selectSingleByDynWhere"));
+		sb.append(makeSelectByDynWhere("queryListByDynWhere"));
+		sb.append(makeSelectByDynWhere("querySingleByDynWhere"));
 		sb.append(makeSelectByPrimaryKey(listKey));
 		sb.append(makeDeleteByPrimaryKey(listKey));
 		sb.append(makeDeleteByDynWhere());
@@ -45,13 +46,70 @@ public class MakeSqlMap  extends CommonFunction{
 		sb.append(makeUpdateByDynWhere(listAll));
 		sb.append(makeUpdateByPrimaryKeySelective(listKey,listUnKey));
 		sb.append(makeUpdateByPrimaryKey(listKey,listUnKey));
-
+		sb.append(makeCountByWhere(listAll));
+		sb.append(makeSelectByWhere(listAll));
+		sb.append(makeSelectSingleByWhere(listAll));
+		sb.append("</mapper>\n");
 		sysLog(sb.toString(), INFO);
 		MappingRule.makeFile(
 				MappingRule.sqlMapPath + "\\"
 						+ tableNameForClassName
 						+ "Mapper.xml", sb.toString());
 
+	}
+
+	private static String makeSelectSingleByWhere(List<TableViewModel> listAll) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("	<select id=\"querySingleByWhere\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
+				+ tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+"\" resultMap=\"BaseResultMap\" >\n");
+		sb.append("		select \n");
+		sb.append(" <include refid=\"Base_Column_List\" /> \n") ;
+		sb.append("  from "+tableName+" t  \n");
+		sb.append("		<where> \n");
+		sb.append("			<include refid=\"where_List\" />\n");
+		sb.append("		</where>\n");
+		sb.append("	</select>\n");
+		return sb.toString();
+	}
+
+	private static String makeSelectByWhere(List<TableViewModel> listAll) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("	<select id=\"queryListByWhere\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
+				+ tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+"\" resultMap=\"BaseResultMap\" >\n");
+		sb.append("		select \n");
+		sb.append(" <include refid=\"Base_Column_List\" /> \n") ;
+		sb.append("  from "+tableName+" t  \n");
+		sb.append("		<where> \n");
+		sb.append("			<include refid=\"where_List\" />\n");
+		sb.append("		</where>\n");
+		sb.append("	</select>\n");
+		
+		return sb.toString();
+	}
+
+	private static String makeCountByWhere(List<TableViewModel> listAll) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("	<select id=\"countByWhere\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
+				+ tableNameForClassName+PropertiesTool.BEANSUFFIXNAME+"\" resultType=\"java.lang.Integer\">\n");
+		sb.append("		select count(1) from "+tableName+" t \n");
+		sb.append("		<where> \n");
+		sb.append("			<include refid=\"where_List\" />\n");
+		sb.append("		</where>\n");
+		sb.append("	</select>\n");
+		return sb.toString();
+	}
+
+	private static String makeWhereList(List<TableViewModel> listAll) {
+		StringBuffer sb=new StringBuffer();
+		sb.append("	<sql id=\"where_List\">\n");
+		for(TableViewModel tb :listAll){
+			sb.append("		<if test=\""+tb.getPropertyName()+" != null and "+tb.getPropertyName()+" !=''\">\n");
+			sb.append("            <![CDATA[ and t."+tb.getFieldName()+" = #{"+tb.getPropertyName()+",jdbcType="+tb.getMyBatisType()+"} ]]>\n");
+			sb.append("		</if>\n");
+		}
+		sb.append("	</sql>\n");
+		
+		return sb.toString();
 	}
 
 	private static String makeUpdateByPrimaryKey(List<TableViewModel> listKey,List<TableViewModel> listUnKey) {
@@ -75,7 +133,6 @@ public class MakeSqlMap  extends CommonFunction{
 			}
 		}
 		sb.append("  </update>\n");
-		sb.append("</mapper>\n");
 		return sb.toString();
 	}
 
@@ -225,7 +282,7 @@ public class MakeSqlMap  extends CommonFunction{
 
 	private static String makeSelectByPrimaryKey(List<TableViewModel> listKey) {
 		StringBuffer sb=new StringBuffer();
-		sb.append("  <select id=\"selectByPrimaryKey\" resultMap=\"BaseResultMap\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
+		sb.append("  <select id=\"queryByPrimaryKey\" resultMap=\"BaseResultMap\" parameterType=\""+PropertiesTool.DOMAINPACKAGENAME.replace(";", "") + "."
 				+ tableNameForClassName+"Key"+PropertiesTool.BEANSUFFIXNAME+"\" >\n");
 		sb.append("    select \n");
 		sb.append("    <include refid=\"Base_Column_List\" />\n");

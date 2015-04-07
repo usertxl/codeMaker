@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.gaofeng.common.CommonFunction;
-import org.gaofeng.common.MappingRule;
 import org.gaofeng.common.db.DBHelper;
 import org.gaofeng.common.properties.PropertiesTool;
 import org.gaofeng.domain.GroupTableViewModel;

@@ -8,9 +8,9 @@ echo 2. 单条生成
 
 set /p c=请输入（1、2）
 if "%c%"=="1" (
-java -cp sqlToDto_fat.jar  org.gaofeng.main.RunBatch
+java -cp codeMaker_fat.jar  org.gaofeng.main.RunBatch
 )
 if "%c%"=="2" (
-java -cp sqlToDto_fat.jar  org.gaofeng.main.RunSingle
+java -cp codeMaker_fat.jar  org.gaofeng.main.RunSingle
 )
 goto begin

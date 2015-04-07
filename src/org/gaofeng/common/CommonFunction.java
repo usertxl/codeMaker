@@ -51,6 +51,7 @@ public class CommonFunction {
 	public static String createView(String stringSqlIn,int count) throws SQLException,
 			ClassNotFoundException {
 		String a = "TMP" + System.currentTimeMillis() + count;
+		sysLog("create view " + a + " as " + stringSqlIn, INFO);
 		db = new DBHelper("create view " + a + " as " + stringSqlIn);
 		db.pst.execute();
 		db.close();
